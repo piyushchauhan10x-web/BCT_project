@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: #0a0812;
+  --color-surface: #14111f;
+  --color-glass: rgba(255, 255, 255, 0.04);
+  --color-glass-hover: rgba(255, 255, 255, 0.07);
+  --color-border: rgba(255, 255, 255, 0.09);
+  --color-text: #f4f2fb;
+  --color-text-soft: #a79fc4;
+  --color-violet: #8b5cf6;
+  --color-violet-light: #c4b5fd;
+  --color-lime: #d3f26a;
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+body {
+  font-family: var(--font-body), sans-serif;
+  position: relative;
+}
+
+/* faint grid backdrop, like the reference */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 15%, black 40%, transparent 90%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 15%, black 40%, transparent 90%);
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  pointer-events: none;
+}
+
+.glass {
+  background: var(--color-glass);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.glass:hover {
+  background: var(--color-glass-hover);
+  border-color: rgba(196, 181, 253, 0.35);
+}
+
+.corner-arrow {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-soft);
+  transition: all 0.25s ease;
+}
+
+.glass:hover .corner-arrow {
+  border-color: var(--color-violet-light);
+  color: var(--color-violet-light);
+  transform: rotate(45deg);
+}
+
+.eyebrow {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-violet-light);
+}
+
+.dot-have::before {
+  content: "";
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: var(--color-lime);
+  margin-right: 0.4rem;
+}
+
+.dot-need::before {
+  content: "";
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: var(--color-violet);
+  margin-right: 0.4rem;
+}

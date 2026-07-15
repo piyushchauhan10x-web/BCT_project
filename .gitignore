@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment variables (secrets — never commit)
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+
+# Next.js build output
+.next/
+**/.next/
+out/
+build/
+
+# Production
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Vercel
+.vercel
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
+
+# Testing
+coverage/
+
+# Misc
+*.tmp
+*.temp
+.cache/
