@@ -98,3 +98,6 @@ Open `http://localhost:3000`. Start backend before frontend.
 - Rate limit: 20 generate calls / 15 min / IP.
 
 this web is made for BCT 2026 5th sem
+
+
+and its final

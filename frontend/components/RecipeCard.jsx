@@ -2,12 +2,8 @@
 import { useState } from "react";
 import RecipeModal from "./RecipeModal";
 
-const filterWater = (items) =>
-  items.filter((item) => !item.toLowerCase().includes("water"));
-
 export default function RecipeCard({ recipe, index }) {
   const [showModal, setShowModal] = useState(false);
-  const missing = filterWater(recipe.ingredients_missing);
 
   return (
     <>
@@ -25,30 +21,34 @@ export default function RecipeCard({ recipe, index }) {
           <h3 className="font-display text-xl font-semibold text-text leading-snug pr-8">
             {recipe.title}
           </h3>
-          {recipe.hindi_name && (
+          {recipe.hindi_name ? (
             <p className="text-sm text-violet-light mt-0.5">{recipe.hindi_name}</p>
-          )}
+          ) : null}
         </div>
 
         <div className="text-sm text-text-soft">
-          {recipe.cook_time_mins} mins · {recipe.servings} servings
+          {recipe.cook_time_mins} mins - {recipe.servings} servings
         </div>
 
         <div className="text-sm">
           <p className="font-medium text-text mb-1">Have</p>
           <p className="text-text-soft leading-relaxed">
             {recipe.ingredients_have.map((item) => (
-              <span key={item} className="dot-have inline-flex items-center mr-3">{item}</span>
+              <span key={item.name} className="dot-have inline-flex items-center mr-3">
+                {item.name} ({item.quantity})
+              </span>
             ))}
           </p>
         </div>
 
-        {missing.length > 0 && (
+        {recipe.ingredients_missing.length > 0 && (
           <div className="text-sm">
             <p className="font-medium text-text mb-1">Need</p>
             <p className="text-text-soft leading-relaxed">
-              {missing.map((item) => (
-                <span key={item} className="dot-need inline-flex items-center mr-3">{item}</span>
+              {recipe.ingredients_missing.map((item) => (
+                <span key={item.name} className="dot-need inline-flex items-center mr-3">
+                  {item.name} ({item.quantity})
+                </span>
               ))}
             </p>
           </div>

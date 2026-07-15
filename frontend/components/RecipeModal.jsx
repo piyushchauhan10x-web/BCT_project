@@ -2,12 +2,6 @@
 import { useState, useEffect } from "react";
 import { saveFavorite, getSessionId } from "@/lib/api";
 
-function filterWater(items) {
-  return items.filter(function (item) {
-    return !item.toLowerCase().includes("water");
-  });
-}
-
 export default function RecipeModal({ recipe, onClose }) {
   const [saved, setSaved] = useState(false);
 
@@ -31,8 +25,6 @@ export default function RecipeModal({ recipe, onClose }) {
       alert("Could not save this recipe. Try again.");
     }
   }
-
-  const shoppingItems = filterWater(recipe.ingredients_missing);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
@@ -89,12 +81,12 @@ export default function RecipeModal({ recipe, onClose }) {
 
           <div className="glass rounded-2xl p-6">
             <p className="font-medium text-text mb-3">Shopping list</p>
-            {shoppingItems.length > 0 ? (
+            {recipe.ingredients_missing.length > 0 ? (
               <ul className="space-y-2">
-                {shoppingItems.map(function (item) {
+                {recipe.ingredients_missing.map(function (item) {
                   return (
-                    <li key={item} className="dot-need text-sm text-text-soft capitalize">
-                      {item}
+                    <li key={item.name} className="dot-need text-sm text-text-soft capitalize">
+                      {item.name} <span className="text-text-soft/70">({item.quantity})</span>
                     </li>
                   );
                 })}

@@ -7,12 +7,19 @@ export default function IngredientForm({ onSubmit, loading }) {
   const [ingredients, setIngredients] = useState([]);
   const [input, setInput] = useState("");
   const [restriction, setRestriction] = useState("none");
+  const [servings, setServings] = useState(2);
 
   const addIngredient = (e) => {
     if (e.key === "Enter" && input.trim()) {
       e.preventDefault();
-      if (!ingredients.includes(input.trim().toLowerCase())) {
-        setIngredients([...ingredients, input.trim().toLowerCase()]);
+      const parts = input
+        .split(",")
+        .map((p) => p.trim().toLowerCase())
+        .filter((p) => p.length > 0);
+
+      const newOnes = parts.filter((p) => !ingredients.includes(p));
+      if (newOnes.length > 0) {
+        setIngredients([...ingredients, ...newOnes]);
       }
       setInput("");
     }
@@ -24,7 +31,7 @@ export default function IngredientForm({ onSubmit, loading }) {
 
   const handleSubmit = () => {
     if (ingredients.length === 0) return;
-    onSubmit(ingredients, restriction);
+    onSubmit(ingredients, restriction, servings);
   };
 
   return (
@@ -39,7 +46,7 @@ export default function IngredientForm({ onSubmit, loading }) {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={addIngredient}
-        placeholder="Type an ingredient, press Enter"
+        placeholder="Type ingredients separated by commas, press Enter"
         className="w-full border border-border rounded-lg px-3 py-2.5 mb-3 bg-white/5 text-text placeholder:text-text-soft/60 focus:outline-none focus:ring-2 focus:ring-violet/50"
       />
 
@@ -62,6 +69,25 @@ export default function IngredientForm({ onSubmit, loading }) {
             </button>
           </span>
         ))}
+      </div>
+
+      <label className="block text-sm font-medium text-text mb-2">Servings</label>
+      <div className="flex items-center gap-3 mb-5">
+        <button
+          type="button"
+          onClick={() => setServings((s) => Math.max(1, s - 1))}
+          className="w-9 h-9 rounded-lg border border-border text-text hover:border-violet-light hover:text-violet-light transition-colors"
+        >
+          −
+        </button>
+        <span className="text-text font-semibold text-lg w-8 text-center">{servings}</span>
+        <button
+          type="button"
+          onClick={() => setServings((s) => Math.min(12, s + 1))}
+          className="w-9 h-9 rounded-lg border border-border text-text hover:border-violet-light hover:text-violet-light transition-colors"
+        >
+          +
+        </button>
       </div>
 
       <label className="block text-sm font-medium text-text mb-2">Dietary restriction</label>
