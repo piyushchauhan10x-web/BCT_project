@@ -30,18 +30,44 @@ function stripStaplesFromMissing(recipes) {
   }));
 }
 
-const SYSTEM_PROMPT = `You are a recipe generation engine. Given a list of ingredients a user has, a dietary restriction, and desired servings, generate exactly 3 distinct recipe options.
+// Force servings to match user request exactly, scale nutrition if model got it wrong
+function enforceServings(recipes, requestedServings) {
+  return recipes.map((r) => {
+    const modelServings = r.servings > 0 ? r.servings : requestedServings;
+    const ratio = requestedServings / modelServings;
+
+    return {
+      ...r,
+      servings: requestedServings,
+      nutrition_estimate: {
+        calories: Math.round(r.nutrition_estimate.calories * ratio),
+        protein_g: Math.round(r.nutrition_estimate.protein_g * ratio),
+        carbs_g: Math.round(r.nutrition_estimate.carbs_g * ratio),
+        fat_g: Math.round(r.nutrition_estimate.fat_g * ratio),
+      },
+    };
+  });
+}
+
+const SYSTEM_PROMPT = `You are a recipe generation engine specializing in Indian home cooking. Given a list of ingredients a user has, a dietary restriction, and desired servings, generate exactly 3 distinct recipe options.
+
+Cuisine preference:
+- Strongly prefer major, well-known Indian recipes that can be made with the given ingredients (e.g. sabzi, dal, paratha, pulao, curry, poha, chilla, sabudana khichdi, etc.) whenever the ingredients reasonably allow it.
+- Only suggest non-Indian dishes if the ingredients genuinely don't fit any common Indian preparation.
+- Prioritize dishes that are actually popular and commonly cooked in Indian households, not obscure or invented dishes.
+
+Servings:
+- The user will specify an exact number of servings. You MUST set "servings" in your output to EXACTLY that number, no exceptions.
+- Scale all ingredient quantities and nutrition_estimate proportionally to match that exact servings count.
 
 Assume these staple items are ALWAYS available in the user's home and NEVER list them in "ingredients_missing": salt, water, mustard oil / cooking oil, turmeric, coriander powder, chilli/chili powder. You may still mention them in steps and in ingredients_have with quantity if the recipe uses them.
 
 Rules:
-- Scale ALL ingredient quantities and nutrition_estimate to the user's requested servings.
-- "ingredients_have" and "ingredients_missing" must each be a list of objects: {"name": string, "quantity": string}. quantity should be a practical cooking measurement (e.g. "2 medium", "1 tsp", "200 g", "1 cup").
+- "ingredients_have" and "ingredients_missing" must each be a list of objects: {"name": string, "quantity": string}. quantity should be a practical cooking measurement (e.g. "2 medium", "1 tsp", "200 g", "1 cup") scaled to the requested servings.
 - Only put an ingredient in "ingredients_missing" if it is genuinely NOT in the user's provided list AND is not one of the staple items above.
 - Respect the dietary restriction strictly (e.g. if "vegan", no animal products anywhere, including in missing ingredients).
-- nutrition_estimate is a reasonable estimate for the full recipe at the requested servings, not a lookup - just estimate sensibly.
 - Steps should be clear, numbered instructions (as plain strings, no numbering prefix needed).
-- "hindi_name": ALWAYS provide this field for every single recipe, no exceptions, in Devanagari script. Translate/transliterate if the dish isn't Indian.
+- "hindi_name": ALWAYS provide this field for every single recipe, no exceptions, in Devanagari script.
 - Respond with ONLY valid JSON. No markdown, no code fences, no commentary before or after.
 
 Required JSON shape:
@@ -70,34 +96,13 @@ async function generateRecipes(ingredients, restriction, servings) {
 
   const userPrompt = `Ingredients available: ${ingredients.join(", ")}
 Dietary restriction: ${restriction || "none"}
-Desired servings: ${servingsCount}
+Exact servings required: ${servingsCount}
 
-Generate 3 recipe options following the rules exactly. Scale quantities and nutrition to ${servingsCount} servings. hindi_name is mandatory for all 3.`;
+Generate 3 recipe options following the rules exactly. "servings" in every recipe object MUST equal ${servingsCount} exactly. Prefer major Indian dishes where the ingredients allow it. hindi_name is mandatory for all 3.`;
 
   const attemptCall = async () => {
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.5,
-      response_format: { type: "json_object" },
-    });
-
-    const raw = completion.choices[0].message.content;
-    const parsed = JSON.parse(raw);
-    const validated = RecipeResponseSchema.parse(parsed);
-    validated.recipes = stripStaplesFromMissing(validated.recipes);
-    return validated;
-  };
-
-  try {
-    return await attemptCall();
-  } catch (err) {
-    console.warn("First attempt failed, retrying once:", err.message);
-    return await attemptCall();
-  }
-}
-
-module.exports = { generateRecipes };
+        {
