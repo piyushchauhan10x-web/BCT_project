@@ -97,4 +97,3 @@ Open `http://localhost:3000`. Start backend before frontend.
 - No auth in v1 — favorites tied to `sessionId` in browser localStorage.
 - Rate limit: 20 generate calls / 15 min / IP.
 
- ghdtgrhfhfgnfnhfnfn
