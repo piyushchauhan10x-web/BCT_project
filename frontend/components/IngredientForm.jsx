@@ -9,19 +9,24 @@ export default function IngredientForm({ onSubmit, loading }) {
   const [restriction, setRestriction] = useState("none");
   const [servings, setServings] = useState(2);
 
-  const addIngredient = (e) => {
-    if (e.key === "Enter" && input.trim()) {
-      e.preventDefault();
-      const parts = input
-        .split(",")
-        .map((p) => p.trim().toLowerCase())
-        .filter((p) => p.length > 0);
+  const commitInput = () => {
+    if (!input.trim()) return;
+    const parts = input
+      .split(",")
+      .map((p) => p.trim().toLowerCase())
+      .filter((p) => p.length > 0);
 
-      const newOnes = parts.filter((p) => !ingredients.includes(p));
-      if (newOnes.length > 0) {
-        setIngredients([...ingredients, ...newOnes]);
-      }
-      setInput("");
+    const newOnes = parts.filter((p) => !ingredients.includes(p));
+    if (newOnes.length > 0) {
+      setIngredients([...ingredients, ...newOnes]);
+    }
+    setInput("");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitInput();
     }
   };
 
@@ -41,14 +46,25 @@ export default function IngredientForm({ onSubmit, loading }) {
         What's in your kitchen?
       </h2>
 
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={addIngredient}
-        placeholder="Type ingredients separated by commas, press Enter"
-        className="w-full border border-border rounded-lg px-3 py-2.5 mb-3 bg-white/5 text-text placeholder:text-text-soft/60 focus:outline-none focus:ring-2 focus:ring-violet/50"
-      />
+      <div className="flex gap-2 mb-3">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type ingredients separated by commas"
+          className="flex-1 min-w-0 border border-border rounded-lg px-3 py-2.5 bg-white/5 text-text placeholder:text-text-soft/60 focus:outline-none focus:ring-2 focus:ring-violet/50"
+        />
+        <button
+          type="button"
+          onClick={commitInput}
+          disabled={!input.trim()}
+          className="shrink-0 w-11 rounded-lg bg-violet/20 border border-violet/30 text-violet-light text-xl font-semibold hover:bg-violet/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Add ingredient"
+        >
+          +
+        </button>
+      </div>
 
       <div className="flex flex-wrap gap-2 mb-5 min-h-[2rem]">
         {ingredients.length === 0 && (
