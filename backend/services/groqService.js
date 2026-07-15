@@ -21,18 +21,20 @@ function stripStaplesFromMissing(recipes) {
   }));
 }
 
+// ALWAYS force servings, no matter what model returned. No division, no trust.
 function enforceServings(recipes, requestedServings) {
   return recipes.map((r) => {
-    const modelServings = r.servings > 0 ? r.servings : requestedServings;
+    const modelServings = r.servings && r.servings > 0 ? r.servings : 1;
     const ratio = requestedServings / modelServings;
+
     return {
       ...r,
-      servings: requestedServings,
+      servings: requestedServings, // hard overwrite, always
       nutrition_estimate: {
-        calories: Math.round(r.nutrition_estimate.calories * ratio),
-        protein_g: Math.round(r.nutrition_estimate.protein_g * ratio),
-        carbs_g: Math.round(r.nutrition_estimate.carbs_g * ratio),
-        fat_g: Math.round(r.nutrition_estimate.fat_g * ratio),
+        calories: Math.max(1, Math.round(r.nutrition_estimate.calories * ratio)),
+        protein_g: Math.max(0, Math.round(r.nutrition_estimate.protein_g * ratio)),
+        carbs_g: Math.max(0, Math.round(r.nutrition_estimate.carbs_g * ratio)),
+        fat_g: Math.max(0, Math.round(r.nutrition_estimate.fat_g * ratio)),
       },
     };
   });
@@ -45,7 +47,7 @@ Cuisine preference:
 - Only suggest non-Indian dishes if the ingredients genuinely don't fit any common Indian preparation.
 
 Servings:
-- The user specifies an exact number of servings. You MUST set "servings" in your output to EXACTLY that number, no exceptions.
+- The user specifies an exact number of servings. Set "servings" in your output to EXACTLY that number.
 - Scale all ingredient quantities and nutrition_estimate proportionally to match that exact servings count.
 
 Assume these staples are always available and NEVER list them in "ingredients_missing": salt, water, mustard oil / cooking oil, turmeric, coriander powder, chilli/chili powder.
@@ -80,7 +82,7 @@ Required JSON shape:
 }`;
 
 async function generateRecipes(ingredients, restriction, servings) {
-  const servingsCount = servings && servings > 0 ? servings : 2;
+  const servingsCount = servings && Number(servings) > 0 ? Number(servings) : 2;
 
   const userPrompt = `Ingredients available: ${ingredients.join(", ")}
 Dietary restriction: ${restriction || "none"}

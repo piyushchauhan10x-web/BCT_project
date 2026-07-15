@@ -4,7 +4,7 @@ export async function generateRecipes(ingredients, restriction, servings) {
   const res = await fetch(`${API_URL}/api/generate-recipes`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ingredients, restriction, servings }),
+    body: JSON.stringify({ ingredients, restriction, servings: Number(servings) }),
   });
   if (!res.ok) throw new Error("Failed to generate recipes");
   return res.json();
