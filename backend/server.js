@@ -7,7 +7,7 @@ const favoriteRoutes = require("./routes/favoriteRoutes");
 const app = express();
 
 app.use(cors({
-  origin: "https://bct-project-khaki.vercel.app/",
+  origin: "https://bct-project-khaki.vercel.app",
 }));
 app.use(express.json());
 
